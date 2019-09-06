@@ -52,8 +52,3 @@ def arrange_queen(num, queen_tup=list()):
  
 for i in arrange_queen(4):
     print(i)
---------------------- 
-作者：NicolasLinJieChuang 
-来源：CSDN 
-原文：https://blog.csdn.net/weixin_41865447/article/details/80034433 
-版权声明：本文为博主原创文章，转载请附上博文链接！
