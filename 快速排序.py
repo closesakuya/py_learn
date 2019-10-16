@@ -11,8 +11,6 @@ def quick_sort(A,p,r):
     #获取分区点，分区点左边数全小于分区点，右边数全大于分区点
     mid = partition(A,p,r)
 
-    ##mid返回值不确定，有可能造成无限循环,故下一步区间要去掉mid
-
     quick_sort(A,p,mid-1)
     quick_sort(A,mid+1,r)
 
@@ -51,7 +49,7 @@ def partition(A, p, r):
     #print(div)
     #游标div始终指向最新未处理值
     #div值最终为小于pivot的值的数量+1
-    #返回mid用作闭区间，故 -1 -1
+    #返回mid用作区间切割
 
     return (div-1)
 
