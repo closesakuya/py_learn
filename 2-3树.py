@@ -1,24 +1,18 @@
-#左结点value小于该结点value，该结点value小于右子节点value
+#默认不含重复key
 
 class Node(object):
-    def __init__(self,value,l = None,r = None):
+    def __init__(self,value,data,value_2 = None,data2 = None,l = None,r = None,m = None):
         self.value = value
+        self.value_2 = value_2
+        self.f = None
         self.l = l
         self.r = r
+        self.m = m
 
     def __str__(self):
-        if self.l:
-            if self.r:
-                return '{0:^10d}\n    /\    \n{1:^5d} {2:^5d}'.format(self.value,self.l.value,self.r.value)
-            else:
-                return '{0:^10d}\n    /\    \n{1:^5d} {2:^5}'.format(self.value,self.l.value,'None')
-        elif self.r:
-            if not self.l:
-                return '{0:^10d}\n    /\    \n{1:^5} {2:^5d}'.format(self.value,'None',self.r.value)
-        else:
-            return '{0:^10d}\n    /\    \n{1:^5} {2:^5}'.format(self.value,'None','None')
+        return str(self.value)+','+str(self.value_2)
 
-class SearchBTree(object):
+class Search2_3Tree(object):
     def __init__(self):
         self.root = None
 
@@ -45,6 +39,7 @@ class SearchBTree(object):
             if root:
                 curlayer += 1
                 _getlayernum(root.l,curlayer,maxlayer)
+                _getlayernum(root.m,curlayer,maxlayer)
                 _getlayernum(root.r,curlayer,maxlayer)
             else:
                 if curlayer > maxlayer[0]:
@@ -70,11 +65,71 @@ class SearchBTree(object):
             res.append(root[0])
         if root[0].r:
             blk.insert(0,(root[0].r,root[1]+1))
+        if root[0].m:
+            blk.insert(0,(root[0].m,root[1]+1))
         if root[0].l:
             blk.insert(0,(root[0].l,root[1]+1))
 
         self._getNodeByLayer(blk[::],res,destlayer)        
 
+
+
+    def split_4(self, node):  #四节点分裂
+        if not hasattr(node,'value_3'):
+            return
+        if not node.value_3:
+            return
+        father = node.f
+        if not father:  #根结点，需要增加一层
+            father = Node(node.value_2,node.data_2)
+            self.root = father
+            node_r = Node(node.value_3,node.data_3)
+            node_r.l = node.m_2
+            node_r.r = node.r
+
+            node.l = node.l
+            node.r = node.m
+            node.value2 = None
+            node.data2 = None
+            node.m = None
+            delattr(node,'value_3')
+            delattr(node,'data_3')
+            delattr(node,'m_2')
+
+            father.l = node_l
+            father.r = node_r
+            return
+
+        newfather = False
+        if not father:  #根结点，需要增加一层
+            newfather = True
+            father = Node(node.value_2,node.data_2)
+            self.root = father
+        #非根结点
+        if not father.value2: #父节点为2节点
+            father.value2 = node.value3
+            father.data2 = node.data3
+            father.m = node
+            node_r = Node(node.value_3,node.data_3)
+            node_r.l = node.m_2
+            node_r.r = node.r
+
+            node.l = node.l
+            node.r = node.m
+            node.value2 = None
+            node.data2 = None
+            node.m = None
+            delattr(node,'value_3')
+            delattr(node,'data_3')
+            delattr(node,'m_2')
+
+            father.l = node_l
+            father.r = node_r            
+            
+            
+            
+            
+            
 
     def insert(self, node):
         if not self.root:
@@ -82,32 +137,25 @@ class SearchBTree(object):
             return
 
         cur = self.root
-        while( True):
-            if cur.value <= node.value: #node值相等或大于cur，插入右子树
-                if cur.r:
-                    cur = cur.r
-                else:
-                    cur.r = node
-                    break
-            else:
-                if cur.l:
-                    cur = cur.l
-                else:
-                    cur.l = node
-                    break
+        while( True):   #查找插入到的叶子节点
+
         return
 
 
     def search(self, value):
         cur = self.root
-        res = []
         while(cur):
-            if cur.value <= value:
-                if cur.value == value:
-                    res.append(cur)
-                cur = cur.r
-            else:
+            if value == cur.value or value == cur.value_2:
+                return cur
+            if value < cur.value:
                 cur = cur.l
+            else if cur.value_2:
+                if value > cur.value_2:
+                    cur = cur.l
+                else:
+                    cur = cur.m
+            else:
+                cur = cur.r
              
         return res
 
@@ -124,7 +172,10 @@ class SearchBTree(object):
         if not root:
             return
         self._traverse_mid(root.l,pfunc = pfunc)
-        pfunc(root)
+        pfunc(root.value)
+        self._traverse_mid(root.m,pfunc = pfunc)
+        if root.value_2:
+            pfunc(root.value_2)
         self._traverse_mid(root.r,pfunc = pfunc)
         
 
@@ -133,9 +184,13 @@ class SearchBTree(object):
         if not blk:
             return
         root = blk.pop(0)
-        pfunc(root)
+        pfunc(root.value)
+        if root.value_2:
+            pfunc(root.value_2)
         if root.l:
             blk.append(root.l)
+        if root.m:
+            blk.append(root.m)
         if root.r:
             blk.append(root.r)
 
